@@ -24,47 +24,6 @@ Repository: <https://github.com/Stanfi1/OBSIDIAN-DUMPER>
 *15-second tour: live process inventory, module map, memory carve, C#/IL inspector
 and both themes · [MP4 version](docs/demo/obsidian-demo.mp4)*
 
-## Slovenčina (krátko)
-
-OBSIDIAN je nástroj pre Windows na analýzu bežiacich .NET procesov. Zobrazí
-procesy s detekciou CLR (Framework aj .NET 5+), zrekonštruuje moduly z pamäte do
-platných PE súborov, nájde assemblies načítané cez `Assembly.Load(byte[])` alebo
-manuálne namapované (voliteľný manažovaný agent, resp. carving pamäte), opraví
-poškodené metadáta z live CLR a všetko, čo vypadne, rovno otvorí v inspektore s
-decompilovaným C# (ILSpy), IL a metadátami. Súčasťou je mapa pamäte, bajtový
-skener, ClrMD snapshot haldy, injekcia natívnych aj manažovaných assemblies a
-headless CLI. Celé rozhranie má tmavú aj svetlú tému.
-
-**Požiadavky:** Windows 10/11 x64. Vydané balíky sú na stránke Releases: väčší
-`OBSIDIAN-1.4.1-win-x64.zip` je self-contained (nepotrebuje žiadny doinštalovaný
-.NET runtime), menší `OBSIDIAN-1.4.1-win-x64-framework-dependent.zip` vyžaduje
-.NET 10 Desktop Runtime. Na zostavenie zo zdrojákov treba .NET 10 SDK (alebo
-novšie).
-
-**Rýchly štart:** stiahni ZIP z
-[Releases](https://github.com/Stanfi1/OBSIDIAN-DUMPER/releases/latest), rozbaľ ho
-a spusť `OBSIDIAN.exe`. Keďže EXE nie je podpísaný, Windows môže zobraziť
-SmartScreen — klikni **More info → Run anyway**. V aplikácii potom vyber proces,
-klikni **Attach** a následne **Dump all managed** (alebo dumpni jednotlivé
-moduly).
-
-**Zostavenie zo zdrojákov (len pre vývojárov s .NET 10 SDK):**
-
-```powershell
-dotnet build Obsidian.Dumper.sln -c Release
-dotnet run --project src\OBSIDIAN\OBSIDIAN.csproj -c Release
-dotnet publish src\OBSIDIAN\OBSIDIAN.csproj -c Release -r win-x64 --self-contained true
-```
-
-Hotové buildy nájdeš na stránke Releases. Repozitár obsahuje len zdrojáky a podklady — na zostavenie slúži `dotnet` CLI a na bežné použitie
-release balíky.
-
-Čo je nové vo verzii 1.4.1 nájdeš v [CHANGELOG.md](CHANGELOG.md). Zvyšok README
-je v angličtine, pretože repozitár je verejný; popis funkcií a obmedzení nižšie
-je presný a aktuálny.
-
-**Architektúra a ukážka:** [diagram](docs/diagram/architecture.png) ·
-[15 s demo (GIF)](docs/demo/obsidian-demo.gif) / [MP4](docs/demo/obsidian-demo.mp4).
 
 ## What it is
 
