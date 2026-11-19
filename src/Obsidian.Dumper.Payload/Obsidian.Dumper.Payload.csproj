@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- .NET Framework only: the managed agent is hosted by ICLRRuntimeHost. -->
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>Obsidian.Dumper.Payload</RootNamespace>
+    <AssemblyName>Obsidian.Dumper.Payload</AssemblyName>
+    <Platforms>AnyCPU</Platforms>
+    <Nullable>disable</Nullable>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Obsidian.Dumper.Shared\**\*.cs" LinkBase="Shared" />
+  </ItemGroup>
+
+</Project>

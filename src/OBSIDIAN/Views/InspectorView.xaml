@@ -1,0 +1,1244 @@
+<UserControl x:Class="Obsidian.Views.InspectorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Obsidian.Controls"
+             UseLayoutRounding="True">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ============================== captures ============================== -->
+        <Grid Grid.Row="0" Margin="0,0,0,8"
+              Visibility="{Binding HasCaptures, Converter={StaticResource BoolToVis}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="CAPTURED" Style="{StaticResource LabelCaps}" VerticalAlignment="Top"
+                           Margin="0,6,8,0" />
+                <ItemsControl Grid.Column="1" ItemsSource="{Binding Captures}" Margin="0,0,8,0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <ToggleButton Style="{StaticResource FilterChip}" Margin="0,0,4,4" Padding="8,4"
+                                    ToolTip="{Binding Detail}"
+                                    Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    IsChecked="{Binding IsActive, Mode=OneWay}"
+                                    Command="{Binding DataContext.SelectCaptureCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+                                <ToggleButton.ContextMenu>
+                                    <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                        <MenuItem Header="Reload capture" Command="{Binding ReloadCommand}" />
+                                        <MenuItem Header="Select file in Explorer" Command="{Binding RevealCommand}" />
+                                        <MenuItem Header="Copy capture path" Command="{Binding CopyCapturePathCommand}" />
+                                        <Separator />
+                                        <MenuItem Header="Remove from recents" Command="{Binding RemoveCaptureCommand}"
+                                                  CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                    </ContextMenu>
+                                </ToggleButton.ContextMenu>
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="4" Height="4" VerticalAlignment="Center"
+                                             Fill="{Binding IsLoaded, Converter={StaticResource BoolBrush}}" />
+                                    <TextBlock Text="{Binding Name}" FontSize="10.5" Margin="6,0,0,0"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding OriginLabel}" FontSize="8.5"
+                                               Foreground="{DynamicResource Dim}" Margin="6,0,0,0"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </ToggleButton>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Style="{StaticResource SecondaryButton}" Height="28" FontSize="11"
+                        Command="{Binding OpenFileCommand}"
+                        ToolTip="Open a managed .dll/.exe from disk for inspection">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE8E5;" FontFamily="{StaticResource IconFont}" FontSize="10"
+                                   VerticalAlignment="Center" Foreground="{DynamicResource TextDim}" />
+                        <TextBlock Text="Open assembly…" Margin="6,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource GhostButton}" Height="28" FontSize="10.5"
+                        Command="{Binding ClearCapturesCommand}" Margin="6,0,0,0" Padding="8,4"
+                        ToolTip="Remove every recent capture from this list (files stay on disk)">
+                    <TextBlock Text="Clear recents" VerticalAlignment="Center" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- ============================== assembly header ============================== -->
+        <Border Grid.Row="1" Style="{StaticResource CardBare}" Padding="12,10" Margin="0,0,0,10"
+                Visibility="{Binding HasAssembly, Converter={StaticResource BoolToVis}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Border Width="32" Height="32" CornerRadius="3" Background="{DynamicResource AccentTint}"
+                        BorderBrush="{DynamicResource AccentBorder}" BorderThickness="1" VerticalAlignment="Center">
+                    <TextBlock Text="&#xE943;" FontFamily="{StaticResource IconFont}" FontSize="14"
+                               Foreground="{DynamicResource AccentText}" HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                </Border>
+
+                <StackPanel Grid.Column="1" Margin="10,0,12,0" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Summary.Name}" Style="{StaticResource H2}" />
+                        <TextBlock Text="{Binding Summary.Version}" FontFamily="{StaticResource MonoFont}" FontSize="10"
+                                   Foreground="{DynamicResource Muted}" Margin="8,2,0,0" VerticalAlignment="Center" />
+                        <Border Style="{StaticResource Badge}" Margin="8,0,0,0">
+                            <TextBlock Text="{Binding Summary.Kind}" FontSize="8.5" Foreground="{DynamicResource TextDim}" />
+                        </Border>
+                        <Border Style="{StaticResource BadgeCyan}" Margin="4,0,0,0">
+                            <TextBlock Text="{Binding Summary.Machine}" FontSize="8.5" Foreground="{DynamicResource CyanText}" />
+                        </Border>
+                        <Border Style="{StaticResource Badge}" Margin="4,0,0,0">
+                            <TextBlock Text="{Binding Summary.RuntimeVersion}" FontSize="8.5"
+                                       Foreground="{DynamicResource Muted}" />
+                        </Border>
+                        <Border Style="{StaticResource BadgeGreen}" Margin="4,0,0,0"
+                                Visibility="{Binding Summary.IsReadyToRun, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="R2R" FontSize="8.5" Foreground="{DynamicResource GreenText}" />
+                        </Border>
+                        <Border Style="{StaticResource BadgeAmber}" Margin="4,0,0,0"
+                                Visibility="{Binding Summary.IsMixedMode, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="MIXED" FontSize="8.5" Foreground="{DynamicResource AmberText}" />
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                        <TextBlock Text="{Binding Summary.TypeCount, StringFormat={}{0} types}" Style="{StaticResource DimText}" />
+                        <TextBlock Text="·" Style="{StaticResource DimText}" Margin="6,0" />
+                        <TextBlock Text="{Binding Summary.MethodCount, StringFormat={}{0} methods}" Style="{StaticResource DimText}" />
+                        <TextBlock Text="·" Style="{StaticResource DimText}" Margin="6,0" />
+                        <TextBlock Text="{Binding Summary.FieldCount, StringFormat={}{0} fields}" Style="{StaticResource DimText}" />
+                        <TextBlock Text="·" Style="{StaticResource DimText}" Margin="6,0" />
+                        <TextBlock Text="{Binding Summary.SizeLabel}" Style="{StaticResource DimText}" />
+                        <TextBlock Text="·" Style="{StaticResource DimText}" Margin="6,0" />
+                        <TextBlock Text="{Binding Summary.Sha256}" FontFamily="{StaticResource MonoFont}" FontSize="9"
+                                   Foreground="{DynamicResource Dim}" TextTrimming="CharacterEllipsis" MaxWidth="220" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding Summary.SourcePath}" Style="{StaticResource MonoText}" FontSize="9" ToolTip="{Binding Summary.SourcePath}"
+                               TextTrimming="CharacterEllipsis" Margin="0,3,0,0" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource IconButton}" Content="&#xE72C;" Command="{Binding ReloadCommand}"
+                                ToolTip="Reload the selected assembly from disk" />
+                        <Button Style="{StaticResource IconButton}" Content="&#xE8C8;" Command="{Binding CopyIdentityCommand}"
+                                ToolTip="Copy the full assembly identity to the clipboard" />
+                        <Button Style="{StaticResource IconButton}" Content="&#xE8B7;" Command="{Binding RevealCommand}"
+                                ToolTip="Select the assembly file in File Explorer" />
+                        <Border Style="{StaticResource ToolbarSeparator}" Margin="6,0" />
+                        <Button Content="MD" Style="{StaticResource GhostButton}" FontSize="9"
+                                FontWeight="Normal" Padding="6,2" Command="{Binding ExportReportMarkdownCommand}"
+                                ToolTip="Export a Markdown report (identity, sections, protections, references, types, strings)" />
+                        <Button Content="JSON" Style="{StaticResource GhostButton}" FontSize="9"
+                                FontWeight="Normal" Padding="6,2" Command="{Binding ExportReportJsonCommand}"
+                                ToolTip="Export the full report as JSON" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ============================== empty state ============================== -->
+        <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0"
+                Visibility="{Binding HasAssembly, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="&#xE943;" FontFamily="{StaticResource IconFont}" FontSize="22"
+                           Foreground="{DynamicResource Dim}" HorizontalAlignment="Center" />
+                <TextBlock Text="{Binding EmptyStateTitle}" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,0"
+                           HorizontalAlignment="Center" />
+                <TextBlock Text="{Binding EmptyStateHint}"
+                           FontSize="11" Foreground="{DynamicResource Muted}" TextAlignment="Center"
+                           TextWrapping="Wrap" MaxWidth="380" Margin="0,5,0,0" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0">
+                    <Button Content="Open assembly…" Style="{StaticResource PrimaryButton}" Width="140" Height="30"
+                            Command="{Binding OpenFileCommand}" />
+                    <Button Content="Reload" Style="{StaticResource SecondaryButton}" Width="90" Height="30"
+                            Margin="6,0,0,0" Command="{Binding ReloadCommand}"
+                            Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}" />
+                    <Button Content="Go to workspace" Style="{StaticResource GhostButton}" Height="30"
+                            Margin="6,0,0,0"
+                            Command="{Binding DataContext.GoToWorkspaceCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+                </StackPanel>
+                <TextBlock Text="Tip: Ctrl+1…7 switches pages. F5 resyncs the current page."
+                           FontSize="9.5" Foreground="{DynamicResource Dim}" Margin="0,12,0,0"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
+        </Border>
+
+        <!-- ============================== tabs ============================== -->
+        <TabControl Grid.Row="2" Style="{StaticResource ObsidianTabControl}"
+                    SelectedIndex="{Binding SelectedTab, Mode=TwoWay}"
+                    Visibility="{Binding HasAssembly, Converter={StaticResource BoolToVis}}">
+            <!-- overview -->
+            <TabItem Header="OVERVIEW" Style="{StaticResource ObsidianTab}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="0,0,6,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.4*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <Border Style="{StaticResource CardTight}">
+                                <StackPanel>
+                                    <Grid>
+                                        <TextBlock Text="IDENTITY" Style="{StaticResource LabelCaps}" />
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Content="Metadata" Style="{StaticResource GhostButton}"
+                                                    FontSize="9" FontWeight="Normal" Padding="5,1"
+                                                    Command="{Binding CopyMetadataCommand}"
+                                                    ToolTip="Copy the full metadata summary to the clipboard" />
+                                            <Button Content="MVID" Style="{StaticResource GhostButton}"
+                                                    FontSize="9" FontWeight="Normal" Padding="5,1"
+                                                    Command="{Binding CopyMvidCommand}"
+                                                    ToolTip="Copy the module version id" />
+                                            <Button Content="Strong name" Style="{StaticResource GhostButton}"
+                                                    FontSize="9" FontWeight="Normal" Padding="5,1"
+                                                    Command="{Binding CopyStrongNameCommand}"
+                                                    ToolTip="Copy the assembly identity and public key token" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <Border Height="1" Background="{DynamicResource Separator}" Margin="0,7,0,4" />
+                                    <Grid Margin="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Margin="0,0,12,0" Text="Full name" Style="{StaticResource FieldLabel}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Summary.FullName}" MaxWidth="380"
+                                                   Style="{StaticResource FieldValue}" />
+                                </Grid>
+                                    <Grid Margin="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Margin="0,0,12,0" Text="Target framework" Style="{StaticResource FieldLabel}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Summary.TargetFramework}" Style="{StaticResource FieldValueMono}" />
+                                </Grid>
+                                    <Grid Margin="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Margin="0,0,12,0" Text="Entry point" Style="{StaticResource FieldLabel}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Summary.EntryPoint}" MaxWidth="360"
+                                                   Style="{StaticResource FieldValueMono}" />
+                                </Grid>
+                                    <Grid Margin="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Margin="0,0,12,0" Text="Strong name" Style="{StaticResource FieldLabel}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding StrongNameText}" Style="{StaticResource FieldValue}" />
+                                </Grid>
+                                    <Grid Margin="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Margin="0,0,12,0" Text="IL only" Style="{StaticResource FieldLabel}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding IlOnlyText}" Style="{StaticResource FieldValue}" />
+                                </Grid>
+                                    <Grid Margin="0,2">
+                                        <TextBlock Text="MVID" Style="{StaticResource FieldLabel}" />
+                                        <TextBlock Text="{Binding Summary.Mvid}" MaxWidth="330"
+                                                   FontFamily="{StaticResource MonoFont}" FontSize="9"
+                                                   Foreground="{DynamicResource Dim}"
+                                                   HorizontalAlignment="Right" TextTrimming="CharacterEllipsis" />
+                                    </Grid>
+                                    <Grid Margin="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Margin="0,0,12,0" Text="Compiled" Style="{StaticResource FieldLabel}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding CompileTimestampText}" Style="{StaticResource FieldValueMono}"
+                                                   Foreground="{DynamicResource Dim}" />
+                                </Grid>
+                                    <Grid Margin="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Margin="0,0,12,0" Text="Company" Style="{StaticResource FieldLabel}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Summary.Company}" MaxWidth="300"
+                                                   Style="{StaticResource FieldValue}" />
+                                </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource CardTight}" Margin="0,10,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="METRICS" Style="{StaticResource LabelCaps}" />
+                                    <UniformGrid Columns="4" Margin="0,8,0,0">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Summary.TypeCount}" Style="{StaticResource StatValue}" />
+                                            <TextBlock Text="types" Style="{StaticResource DimText}" Margin="0,1,0,0" />
+                                        </StackPanel>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Summary.MethodCount}" Style="{StaticResource StatValue}" />
+                                            <TextBlock Text="methods" Style="{StaticResource DimText}" Margin="0,1,0,0" />
+                                        </StackPanel>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Summary.AssemblyRefCount}" Style="{StaticResource StatValue}" />
+                                            <TextBlock Text="references" Style="{StaticResource DimText}" Margin="0,1,0,0" />
+                                        </StackPanel>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Summary.NamespaceCount}" Style="{StaticResource StatValue}" />
+                                            <TextBlock Text="namespaces" Style="{StaticResource DimText}" Margin="0,1,0,0" />
+                                        </StackPanel>
+                                    </UniformGrid>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource CardTight}" Margin="0,10,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="RESOURCES" Style="{StaticResource LabelCaps}" />
+                                    <ItemsControl ItemsSource="{Binding Summary.Resources}" Margin="0,5,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,2">
+                                                    <TextBlock Text="{Binding Name}" FontSize="10"
+                                                               Foreground="{DynamicResource TextDim}"
+                                                               TextTrimming="CharacterEllipsis" MaxWidth="360"
+                                                               HorizontalAlignment="Left" />
+                                                    <TextBlock Text="{Binding SizeLabel}" HorizontalAlignment="Right"
+                                                               FontFamily="{StaticResource MonoFont}" FontSize="9"
+                                                               Foreground="{DynamicResource Dim}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="no embedded resources" Style="{StaticResource DimText}"
+                                               Margin="0,4,0,0"
+                                               Visibility="{Binding Summary.ResourceCount, Converter={StaticResource CountToVis}}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <Border Style="{StaticResource CardTight}">
+                                <StackPanel>
+                                    <TextBlock Text="SECTIONS · ENTROPY" Style="{StaticResource LabelCaps}" />
+                                    <ItemsControl ItemsSource="{Binding Summary.Sections}" Margin="0,8,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,4">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="66" />
+                                                        <ColumnDefinition Width="134" />
+                                                        <ColumnDefinition Width="42" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Name}" FontFamily="{StaticResource MonoFont}"
+                                                               FontSize="9.5" Foreground="{DynamicResource TextDim}" />
+                                                    <Grid Grid.Column="1" VerticalAlignment="Center" Height="4" Margin="0,0,10,0"
+                                                          x:Name="EntropyTrack">
+                                                        <Border CornerRadius="1" Background="{DynamicResource SurfaceSunken}" />
+                                                        <Border CornerRadius="1" HorizontalAlignment="Left"
+                                                                Background="{DynamicResource Cyan}">
+                                                            <Border.Width>
+                                                                <MultiBinding Converter="{StaticResource EntropyWidth}">
+                                                                    <Binding Path="EntropyPercent" />
+                                                                    <Binding Path="ActualWidth" ElementName="EntropyTrack" />
+                                                                </MultiBinding>
+                                                            </Border.Width>
+                                                        </Border>
+                                                    </Grid>
+                                                    <TextBlock Grid.Column="2" Text="{Binding EntropyLabel}"
+                                                               HorizontalAlignment="Right"
+                                                               FontFamily="{StaticResource MonoFont}" FontSize="9"
+                                                               Foreground="{DynamicResource Muted}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource CardTight}" Margin="0,10,0,0">
+                                <StackPanel>
+                                    <Grid>
+                                        <TextBlock Text="PROTECTIONS" Style="{StaticResource LabelCaps}" />
+                                        <Border Style="{StaticResource BadgeAmber}" HorizontalAlignment="Right"
+                                                Visibility="{Binding Summary.Protections.Count, Converter={StaticResource CountToVis}, ConverterParameter=invert}">
+                                            <TextBlock Text="{Binding Summary.Protections.Count, StringFormat={}{0} hints}"
+                                                       FontSize="8.5" Foreground="{DynamicResource AmberText}" />
+                                        </Border>
+                                    </Grid>
+                                    <ItemsControl ItemsSource="{Binding Summary.Protections}" Margin="0,7,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{DynamicResource PanelAlt}"
+                                                        BorderBrush="{DynamicResource BorderSoft}" BorderThickness="1"
+                                                        CornerRadius="3" Padding="8,6" Margin="0,0,0,4">
+                                                    <StackPanel>
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding Name}" FontSize="10.5"
+                                                                       FontWeight="SemiBold" />
+                                                            <TextBlock Text="{Binding SeverityLabel}"
+                                                                       HorizontalAlignment="Right"
+                                                                       FontSize="8.5" FontWeight="SemiBold"
+                                                                       Foreground="{Binding Severity, Converter={StaticResource SeverityBrush}}" />
+                                                        </Grid>
+                                                        <TextBlock Text="{Binding Evidence}" FontFamily="{StaticResource MonoFont}"
+                                                                   FontSize="8.5" Foreground="{DynamicResource Dim}"
+                                                                   Margin="0,3,0,0" TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="no protector fingerprints detected" Style="{StaticResource DimText}"
+                                               Visibility="{Binding Summary.Protections.Count, Converter={StaticResource CountToVis}}" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- references preview: the same data as the REFERENCES tab, in summary form -->
+                        <Border Grid.Row="1" Grid.ColumnSpan="3" Style="{StaticResource CardTight}" Margin="0,10,0,0">
+                            <StackPanel>
+                                <Grid>
+                                    <TextBlock Text="REFERENCES" Style="{StaticResource LabelCaps}" />
+                                </Grid>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="126" Margin="0,6,0,0">
+                                    <ItemsControl ItemsSource="{Binding Summary.References}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Height="22">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="120" />
+                                                        <ColumnDefinition Width="70" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Name}" FontFamily="{StaticResource MonoFont}"
+                                                               FontSize="9.5" Foreground="{DynamicResource TextDim}"
+                                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding Version}"
+                                                               FontFamily="{StaticResource MonoFont}" FontSize="9"
+                                                               Foreground="{DynamicResource Dim}"
+                                                               VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding Kind}" FontSize="9"
+                                                               Foreground="{DynamicResource Muted}"
+                                                               VerticalAlignment="Center" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- explorer -->
+            <TabItem Header="EXPLORER" Style="{StaticResource ObsidianTab}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="260" />
+                        <ColumnDefinition Width="1" />
+                        <ColumnDefinition Width="230" />
+                        <ColumnDefinition Width="1" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- types -->
+                    <Grid Grid.Column="0" Margin="0,0,10,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid>
+                            <TextBox x:Name="TypeFilterBox" Style="{StaticResource SearchBox}" Padding="26,5,8,5" FontSize="10.5"
+                                     Text="{Binding TypeFilter, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFont}" FontSize="10"
+                                       Foreground="{DynamicResource Dim}" Margin="9,0,0,0" VerticalAlignment="Center"
+                                       IsHitTestVisible="False" />
+                            <TextBlock Text="Search types…" FontSize="10" Foreground="{DynamicResource Dim}"
+                                       Margin="26,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                                       Visibility="{Binding TypeFilter, Converter={StaticResource StringEmpty}}" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                        Margin="0,0,5,0">
+                                <TextBlock Text="{Binding VisibleTypeCount}" FontSize="9"
+                                           Foreground="{DynamicResource Dim}" VerticalAlignment="Center" />
+                                <Button Content="Expand" Style="{StaticResource GhostButton}" FontSize="8.5"
+                                        FontWeight="Normal" Padding="4,1" Margin="5,0,0,0"
+                                        Command="{Binding ExpandAllTypesCommand}"
+                                        ToolTip="Show nested and compiler-generated types" />
+                                <Button Content="Collapse" Style="{StaticResource GhostButton}" FontSize="8.5"
+                                        FontWeight="Normal" Padding="4,1"
+                                        Command="{Binding CollapseAllTypesCommand}"
+                                        ToolTip="Hide nested types (top-level view)" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Grid.Row="1" Margin="0,6,0,0">
+                            <ListBox Style="{StaticResource PlainList}" ItemsSource="{Binding TypesView}" Margin="0,0,4,0" SelectedItem="{Binding SelectedType}"
+                                     VirtualizingPanel.IsVirtualizing="True"
+                                     VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                                     VirtualizingPanel.VirtualizationMode="Recycling"
+                                     ScrollViewer.CanContentScroll="True">
+                                <ListBox.GroupStyle>
+                                    <GroupStyle>
+                                        <GroupStyle.HeaderTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" Style="{StaticResource LabelCaps}"
+                                                           Margin="8,8,0,3" />
+                                            </DataTemplate>
+                                        </GroupStyle.HeaderTemplate>
+                                    </GroupStyle>
+                                </ListBox.GroupStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Height="26">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="34" />
+                                                <ColumnDefinition Width="24" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Border Width="{Binding IndentPixels}" />
+                                                <TextBlock Text="{Binding Name}" FontSize="10.5" VerticalAlignment="Center" ToolTip="{Binding Name}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding KindLabel}" FontSize="8"
+                                                       Foreground="{DynamicResource Dim}" VerticalAlignment="Center"
+                                                       HorizontalAlignment="Right" />
+                                            <TextBlock Grid.Column="2" Text="{Binding MethodCount}" FontSize="9"
+                                                       FontFamily="{StaticResource MonoFont}"
+                                                       Foreground="{DynamicResource Dim}" VerticalAlignment="Center"
+                                                       HorizontalAlignment="Right" Margin="0,0,4,0" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <TextBlock Text="No types match this filter" Style="{StaticResource DimText}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       IsHitTestVisible="False" TextWrapping="Wrap" TextAlignment="Center"
+                                       MaxWidth="200"
+                                       Visibility="{Binding IsTypesEmpty, Converter={StaticResource BoolToVis}}" />
+                        </Grid>
+                    </Grid>
+
+                    <Border Grid.Column="1" Background="{DynamicResource Separator}" />
+
+                    <!-- methods -->
+                    <Grid Grid.Column="2" Margin="10,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{Binding SelectedTypeHeader}" FontSize="11" FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding SelectedTypeSummary}" Style="{StaticResource DimText}" FontSize="9"
+                                       Margin="0,2,0,0" />
+                        </StackPanel>
+                        <ListBox Grid.Row="1" Style="{StaticResource PlainList}" ItemsSource="{Binding Methods}"
+                                 SelectedItem="{Binding SelectedMethod}" Margin="0,6,10,0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Height="24">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Signature}" FontSize="10" ToolTip="{Binding Signature}"
+                                                   FontFamily="{StaticResource MonoFont}"
+                                                   Foreground="{DynamicResource TextDim}" TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding IlSizeLabel}" FontSize="8.5"
+                                                   Foreground="{DynamicResource Dim}" VerticalAlignment="Center"
+                                                   Margin="5,0,3,0" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+
+                    <Border Grid.Column="3" Background="{DynamicResource Separator}" />
+
+                    <!-- code -->
+                    <Grid Grid.Column="4" Margin="10,0,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0" Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid Height="26">
+                                <TextBox Style="{StaticResource SearchBox}" Padding="24,3,8,3" FontSize="10.5"
+                                         Text="{Binding CodeSearchInput, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFont}" FontSize="9"
+                                           Foreground="{DynamicResource Dim}" Margin="8,0,0,0"
+                                           VerticalAlignment="Center" IsHitTestVisible="False" />
+                                <TextBlock Text="Highlight in C# and IL…" FontSize="10"
+                                           Foreground="{DynamicResource Dim}" Margin="24,0,0,0"
+                                           VerticalAlignment="Center" IsHitTestVisible="False"
+                                           Visibility="{Binding CodeSearchInput, Converter={StaticResource StringEmpty}}" />
+                            </Grid>
+                            <TextBlock Grid.Column="1" Text="{Binding CodeSearchLabel}" FontSize="9.5"
+                                       Foreground="{DynamicResource Muted}" VerticalAlignment="Center" Margin="8,0,0,0" />
+                        </Grid>
+                        <TabControl Grid.Row="1" Style="{StaticResource ObsidianTabControl}">
+                            <TabItem Style="{StaticResource ObsidianTab}" AutomationProperties.Name="C#">
+                                <TabItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="C#" Style="{StaticResource TabHeaderText}" AutomationProperties.Name="C Sharp label" VerticalAlignment="Center" />
+                                        <Button Content="&#xE8C8;" Style="{StaticResource IconButton}"
+                                                Command="{Binding CopySourceCommand}" Width="20" Height="20"
+                                                FontSize="10" Margin="6,0,0,0"
+                                                ToolTip="Copy the decompiled C# to the clipboard"
+                                                AutomationProperties.Name="Copy decompiled C#" />
+                                        <Button Content="&#xE74E;" Style="{StaticResource IconButton}"
+                                                Command="{Binding SaveSourceCommand}" Width="20" Height="20"
+                                                FontSize="10"
+                                                ToolTip="Save the decompiled C# to a .cs file"
+                                                AutomationProperties.Name="Save decompiled C#" />
+                                    </StackPanel>
+                                </TabItem.Header>
+                                <Border Background="{DynamicResource CodeBackground}"
+                                        BorderBrush="{DynamicResource BorderSoft}" BorderThickness="1"
+                                        CornerRadius="3" ClipToBounds="True">
+                                    <Grid>
+                                        <controls:CodeView Code="{Binding SourceCode, Mode=OneWay}" CodeKind="CSharp"
+                                                           SearchTerm="{Binding CodeSearchTerm, Mode=OneWay}" />
+                                        <TextBlock Text="Select a type to decompile" Style="{StaticResource DimText}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   IsHitTestVisible="False"
+                                                   Visibility="{Binding SourceCode, Converter={StaticResource StringEmpty}}" />
+                                        <TextBlock Text="decompiling…" FontSize="9.5"
+                                                   Foreground="{DynamicResource AccentSoft}"
+                                                   HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                   Margin="0,6,10,0" IsHitTestVisible="False"
+                                                   Visibility="{Binding IsDecompiling, Converter={StaticResource BoolToVis}}" />
+                                    </Grid>
+                                </Border>
+                            </TabItem>
+                            <TabItem Style="{StaticResource ObsidianTab}" AutomationProperties.Name="IL">
+                                <TabItem.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="IL" Style="{StaticResource TabHeaderText}" AutomationProperties.Name="IL label" VerticalAlignment="Center" />
+                                        <Button Content="&#xE8C8;" Style="{StaticResource IconButton}"
+                                                Command="{Binding CopyIlCommand}" Width="20" Height="20"
+                                                FontSize="10" Margin="6,0,0,0"
+                                                ToolTip="Copy the disassembled IL to the clipboard"
+                                                AutomationProperties.Name="Copy IL" />
+                                    </StackPanel>
+                                </TabItem.Header>
+                                <Border Background="{DynamicResource CodeBackground}"
+                                        BorderBrush="{DynamicResource BorderSoft}" BorderThickness="1"
+                                        CornerRadius="3" ClipToBounds="True">
+                                    <Grid>
+                                        <controls:CodeView Code="{Binding IlCode, Mode=OneWay}" CodeKind="Il"
+                                                           SearchTerm="{Binding CodeSearchTerm, Mode=OneWay}" />
+                                        <TextBlock Text="Select a method to disassemble" Style="{StaticResource DimText}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   IsHitTestVisible="False"
+                                                   Visibility="{Binding IlCode, Converter={StaticResource StringEmpty}}" />
+                                    </Grid>
+                                </Border>
+                            </TabItem>
+                        </TabControl>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- strings -->
+            <TabItem Style="{StaticResource ObsidianTab}" AutomationProperties.Name="STRINGS">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="STRINGS" Style="{StaticResource TabHeaderText}" AutomationProperties.Name="Strings label" VerticalAlignment="Center" />
+                        <Button Content="&#xE8C8;" Style="{StaticResource IconButton}"
+                                Command="{Binding CopyAllStringsCommand}" Width="20" Height="20"
+                                FontSize="10" Margin="6,0,0,0"
+                                ToolTip="Copy every visible literal string to the clipboard"
+                                AutomationProperties.Name="Copy all strings" />
+                    </StackPanel>
+                </TabItem.Header>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid Width="300" HorizontalAlignment="Left">
+                            <TextBox Style="{StaticResource SearchBox}" Padding="26,5,8,5" FontSize="10.5"
+                                     Text="{Binding StringFilter, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFont}" FontSize="10"
+                                       Foreground="{DynamicResource Dim}" Margin="9,0,0,0" VerticalAlignment="Center"
+                                       IsHitTestVisible="False" />
+                            <TextBlock Text="Search literals…" FontSize="10" Foreground="{DynamicResource Dim}"
+                                       Margin="26,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                                       Visibility="{Binding StringFilter, Converter={StaticResource StringEmpty}}" />
+                        </Grid>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <TextBlock Text="{Binding VisibleStringCount, StringFormat={}{0} literals}"
+                                       Style="{StaticResource DimText}" Margin="0,0,12,0" VerticalAlignment="Center" />
+                            <CheckBox Style="{StaticResource ObsidianCheckBox}" Content="Short strings"
+                                      ToolTip="Include literals shorter than 6 characters"
+                                      IsChecked="{Binding ShowShortStrings}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Grid.Row="1" Style="{StaticResource CardBare}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="26" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Border Background="{DynamicResource SurfaceHeader}" />
+                            <Grid Margin="10,0,12,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="86" />
+                                    <ColumnDefinition Width="64" />
+                                    <ColumnDefinition Width="54" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="VALUE" Style="{StaticResource TableHeaderText}" />
+                                <TextBlock Grid.Column="1" Text="KIND" Style="{StaticResource TableHeaderText}" />
+                                <TextBlock Grid.Column="2" Text="LENGTH" Style="{StaticResource TableHeaderText}" />
+                                <TextBlock Grid.Column="3" Text="USES" Style="{StaticResource TableHeaderText}" />
+                            </Grid>
+                            <Border Grid.Row="0" Height="1" VerticalAlignment="Bottom" Background="{DynamicResource Separator}" />
+                            <Grid Grid.Row="1">
+                                <ListBox Style="{StaticResource TableList}" ItemsSource="{Binding StringsView}"
+                                         Margin="2,1,2,4">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Height="24" ToolTip="{Binding Display}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="86" />
+                                                    <ColumnDefinition Width="64" />
+                                                    <ColumnDefinition Width="54" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Display}" FontFamily="{StaticResource MonoFont}"
+                                                           FontSize="9.5" Foreground="{DynamicResource TextDim}"
+                                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Kind}" FontSize="9"
+                                                           Foreground="{DynamicResource Dim}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="2" Text="{Binding Length}" FontSize="9"
+                                                           FontFamily="{StaticResource MonoFont}"
+                                                           Foreground="{DynamicResource Dim}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="3" Text="{Binding Count}" FontSize="9"
+                                                           FontFamily="{StaticResource MonoFont}"
+                                                           Foreground="{DynamicResource Dim}" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <TextBlock Text="No literal strings match this filter" Style="{StaticResource DimText}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           IsHitTestVisible="False" TextWrapping="Wrap" TextAlignment="Center"
+                                           MaxWidth="280"
+                                           Visibility="{Binding IsStringsEmpty, Converter={StaticResource BoolToVis}}" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- references -->
+            <TabItem Header="REFERENCES" Style="{StaticResource ObsidianTab}">
+                <Border Style="{StaticResource CardBare}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="26" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Border Background="{DynamicResource SurfaceHeader}" />
+                        <Grid Margin="10,0,12,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="94" />
+                                <ColumnDefinition Width="94" />
+                                <ColumnDefinition Width="86" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="ASSEMBLY / MODULE" Style="{StaticResource TableHeaderText}" />
+                            <TextBlock Grid.Column="1" Text="VERSION" Style="{StaticResource TableHeaderText}" />
+                            <TextBlock Grid.Column="2" Text="CULTURE" Style="{StaticResource TableHeaderText}" />
+                            <TextBlock Grid.Column="3" Text="SCOPE" Style="{StaticResource TableHeaderText}" />
+                        </Grid>
+                        <Border Grid.Row="0" Height="1" VerticalAlignment="Bottom" Background="{DynamicResource Separator}" />
+                        <ListBox Grid.Row="1" Style="{StaticResource TableList}" ItemsSource="{Binding Summary.References}"
+                                 Margin="2,1,2,4">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Height="26">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="94" />
+                                            <ColumnDefinition Width="94" />
+                                            <ColumnDefinition Width="86" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="&#xE8A5;" FontFamily="{StaticResource IconFont}"
+                                                       FontSize="10" Foreground="{DynamicResource Dim}"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding Name}" FontSize="10.5" Margin="7,0,0,0"
+                                                       Foreground="{DynamicResource TextDim}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{Binding Version}" FontSize="9.5"
+                                                   FontFamily="{StaticResource MonoFont}"
+                                                   Foreground="{DynamicResource Dim}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Culture}" FontSize="9.5"
+                                                   Foreground="{DynamicResource Dim}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="3" Text="{Binding Kind}" FontSize="9"
+                                                   Foreground="{DynamicResource Muted}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+            </TabItem>
+
+            <!-- protections -->
+            <TabItem Header="PROTECTIONS" Style="{StaticResource ObsidianTab}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,0,6,0">
+                        <Border Style="{StaticResource CardTight}">
+                            <StackPanel>
+                                <Grid>
+                                    <TextBlock Text="PROTECTOR FINGERPRINTS" Style="{StaticResource LabelCaps}" />
+                                    <TextBlock Text="{Binding Summary.TypeCount, StringFormat={}scanned {0} types}"
+                                               Style="{StaticResource DimText}" HorizontalAlignment="Right" />
+                                </Grid>
+                                <ItemsControl ItemsSource="{Binding Summary.Protections}" Margin="0,8,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource PanelAlt}"
+                                                    BorderBrush="{DynamicResource BorderSoft}" BorderThickness="1"
+                                                    CornerRadius="3" Padding="10,8" Margin="0,0,0,6">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="3" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Background="{Binding Severity, Converter={StaticResource SeverityBrush}}"
+                                                            CornerRadius="1" Margin="0,1" />
+                                                    <StackPanel Grid.Column="1" Margin="9,0,0,0">
+                                                        <Grid>
+                                                            <TextBlock Text="{Binding Name}" FontSize="11.5"
+                                                                       FontWeight="SemiBold" />
+                                                            <TextBlock Text="{Binding SeverityLabel}" HorizontalAlignment="Right"
+                                                                       FontSize="9" FontWeight="SemiBold"
+                                                                       Foreground="{Binding Severity, Converter={StaticResource SeverityBrush}}" />
+                                                        </Grid>
+                                                        <TextBlock Text="{Binding Description}" FontSize="10.5"
+                                                                   Foreground="{DynamicResource Muted}" TextWrapping="Wrap"
+                                                                   Margin="0,3,0,0" />
+                                                        <TextBlock Text="{Binding Evidence}" FontFamily="{StaticResource MonoFont}"
+                                                                   FontSize="9" Foreground="{DynamicResource Dim}"
+                                                                   Margin="0,4,0,0" TextWrapping="Wrap" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="No protector fingerprints detected — the module looks conventionally compiled."
+                                           FontSize="10.5" Foreground="{DynamicResource Muted}" Margin="0,6,0,0"
+                                           Visibility="{Binding Summary.Protections.Count, Converter={StaticResource CountToVis}}" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource CardTight}" Margin="0,10,0,0">
+                            <StackPanel>
+                                <TextBlock Text="SECTION ENTROPY" Style="{StaticResource LabelCaps}" />
+                                <ItemsControl ItemsSource="{Binding Summary.Sections}" Margin="0,8,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="74" />
+                                                    <ColumnDefinition Width="200" />
+                                                    <ColumnDefinition Width="44" />
+                                                    <ColumnDefinition Width="48" />
+                                                    <ColumnDefinition Width="80" />
+                                                    <ColumnDefinition Width="64" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Name}" FontFamily="{StaticResource MonoFont}"
+                                                           FontSize="10" Foreground="{DynamicResource TextDim}" />
+                                                <Grid Grid.Column="1" Height="4" VerticalAlignment="Center"
+                                                      x:Name="EntropyTrack">
+                                                    <Border CornerRadius="1" Background="{DynamicResource SurfaceSunken}" />
+                                                    <Border CornerRadius="1" HorizontalAlignment="Left"
+                                                            Background="{DynamicResource Cyan}">
+                                                        <Border.Width>
+                                                            <MultiBinding Converter="{StaticResource EntropyWidth}">
+                                                                <Binding Path="EntropyPercent" />
+                                                                <Binding Path="ActualWidth" ElementName="EntropyTrack" />
+                                                            </MultiBinding>
+                                                        </Border.Width>
+                                                    </Border>
+                                                </Grid>
+                                                <TextBlock Grid.Column="2" Text="{Binding EntropyLabel}"
+                                                           HorizontalAlignment="Right"
+                                                           FontFamily="{StaticResource MonoFont}" FontSize="9.5"
+                                                           Foreground="{DynamicResource Muted}" />
+                                                <TextBlock Grid.Column="3" Text="{Binding FlagsLabel}"
+                                                           HorizontalAlignment="Right"
+                                                           FontFamily="{StaticResource MonoFont}" FontSize="9.5"
+                                                           Foreground="{DynamicResource Dim}" />
+                                                <TextBlock Grid.Column="4" Text="{Binding VirtualSize, StringFormat={}v 0x{0:X}}"
+                                                           HorizontalAlignment="Right"
+                                                           FontFamily="{StaticResource MonoFont}" FontSize="8.5"
+                                                           Foreground="{DynamicResource Dim}" />
+                                                <TextBlock Grid.Column="5" Text="{Binding SizeLabel}"
+                                                           HorizontalAlignment="Right"
+                                                           FontFamily="{StaticResource MonoFont}" FontSize="8.5"
+                                                           Foreground="{DynamicResource Dim}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- pe headers -->
+            <TabItem Header="PE" Style="{StaticResource ObsidianTab}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Row="0" Grid.ColumnSpan="3" Style="{StaticResource CardTight}"
+                            Margin="0,0,0,8" Padding="12,7">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="PE HEADERS" Style="{StaticResource LabelCaps}"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{Binding PeSummary}" Style="{StaticResource DimText}"
+                                       Margin="16,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" ToolTip="{Binding PeSummary}" />
+                            <Border Grid.Row="1" Grid.ColumnSpan="2" Background="{DynamicResource RedTint}"
+                                    BorderBrush="{DynamicResource BadgeBorderRed}" BorderThickness="1"
+                                    CornerRadius="3" Padding="8,5" Margin="0,6,0,0"
+                                    Visibility="{Binding HasPeError, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="{Binding PeError}" FontSize="10"
+                                           Foreground="{DynamicResource RedText}" TextWrapping="Wrap" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource CardBare}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding PeFields}" Margin="11,6,11,8">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Name}" Style="{StaticResource FieldLabel}"
+                                                       Margin="0,0,12,0" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Value}"
+                                                       FontFamily="{StaticResource MonoFont}" FontSize="9.5"
+                                                       Foreground="{DynamicResource TextDim}"
+                                                       HorizontalAlignment="Right" TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding Value}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+
+                    <Grid Grid.Row="1" Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Style="{StaticResource CardTight}" Padding="12,8">
+                            <StackPanel>
+                                <TextBlock Text="SECTIONS" Style="{StaticResource LabelCaps}" />
+                                <Grid Margin="0,7,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70" />
+                                        <ColumnDefinition Width="92" />
+                                        <ColumnDefinition Width="64" />
+                                        <ColumnDefinition Width="46" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="NAME" Style="{StaticResource TableHeaderText}" />
+                                    <TextBlock Grid.Column="1" Text="RVA" Style="{StaticResource TableHeaderText}" />
+                                    <TextBlock Grid.Column="2" Text="VSIZE" Style="{StaticResource TableHeaderText}" />
+                                    <TextBlock Grid.Column="3" Text="ENTROPY" Style="{StaticResource TableHeaderText}" />
+                                    <TextBlock Grid.Column="4" Text="FLAGS" Style="{StaticResource TableHeaderText}" />
+                                </Grid>
+                                <Border Height="1" Background="{DynamicResource Separator}" />
+                                <ScrollViewer MaxHeight="160" VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl ItemsSource="{Binding PeSections}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,3">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="70" />
+                                                        <ColumnDefinition Width="92" />
+                                                        <ColumnDefinition Width="64" />
+                                                        <ColumnDefinition Width="46" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Name}" FontFamily="{StaticResource MonoFont}"
+                                                               FontSize="10" Foreground="{DynamicResource Text}" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding RvaLabel}"
+                                                               FontFamily="{StaticResource MonoFont}" FontSize="9"
+                                                               Foreground="{DynamicResource Muted}" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding VirtualSizeLabel}"
+                                                               FontFamily="{StaticResource MonoFont}" FontSize="9"
+                                                               Foreground="{DynamicResource Muted}" />
+                                                    <TextBlock Grid.Column="3" Text="{Binding EntropyLabel}"
+                                                               FontFamily="{StaticResource MonoFont}" FontSize="9"
+                                                               Foreground="{DynamicResource TextDim}" />
+                                                    <TextBlock Grid.Column="4" Text="{Binding FlagsLabel}" FontSize="9"
+                                                               Foreground="{DynamicResource Dim}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Row="1" Style="{StaticResource CardBare}" Margin="0,8,0,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="26" />
+                                    <RowDefinition Height="24" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" Margin="11,0" VerticalAlignment="Center">
+                                    <TextBlock Text="DATA DIRECTORIES" Style="{StaticResource LabelCaps}"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding PeDirectories.Count}" Style="{StaticResource DimText}"
+                                               Margin="8,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <Border Grid.Row="0" Height="1" VerticalAlignment="Bottom"
+                                        Background="{DynamicResource Separator}" />
+                                <Grid Grid.Row="1" Margin="11,0,11,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="130" />
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="80" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="DIRECTORY" Style="{StaticResource TableHeaderText}" />
+                                    <TextBlock Grid.Column="1" Text="RVA" Style="{StaticResource TableHeaderText}" />
+                                    <TextBlock Grid.Column="2" Text="SIZE" Style="{StaticResource TableHeaderText}" />
+                                </Grid>
+                                <Border Grid.Row="1" Height="1" VerticalAlignment="Bottom"
+                                        Background="{DynamicResource GridLine}" />
+                                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,2,0,0">
+                                    <ItemsControl ItemsSource="{Binding PeDirectories}" Margin="11,2,11,8">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,2">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="130" />
+                                                        <ColumnDefinition Width="100" />
+                                                        <ColumnDefinition Width="80" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Name}" FontSize="10"
+                                                               Foreground="{DynamicResource TextDim}" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding RvaLabel}"
+                                                               FontFamily="{StaticResource MonoFont}" FontSize="9"
+                                                               Foreground="{DynamicResource Muted}" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding SizeLabel}"
+                                                               FontFamily="{StaticResource MonoFont}" FontSize="9"
+                                                               Foreground="{DynamicResource Muted}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- resources -->
+            <TabItem Header="RESOURCES" Style="{StaticResource ObsidianTab}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource CardBare}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="26" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Margin="10,0,10,0" VerticalAlignment="Center">
+                                <TextBlock Text="RESOURCES" Style="{StaticResource LabelCaps}" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding Summary.Resources.Count}" Style="{StaticResource DimText}"
+                                           Margin="8,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Border Grid.Row="0" Height="1" VerticalAlignment="Bottom"
+                                    Background="{DynamicResource Separator}" />
+                            <ListBox x:Name="ResourceList" Grid.Row="1" Style="{StaticResource TableList}"
+                                     ItemsSource="{Binding Summary.Resources}"
+                                     SelectedItem="{Binding SelectedResource, Mode=TwoWay}" Margin="2,2,2,4">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Height="26">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" FontFamily="{StaticResource MonoFont}"
+                                                           FontSize="9.5" Foreground="{DynamicResource TextDim}"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           ToolTip="{Binding Name}" />
+                                                <TextBlock Text="{Binding Kind}" FontSize="8.5"
+                                                           Foreground="{DynamicResource Dim}" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding SizeLabel}"
+                                                       FontFamily="{StaticResource MonoFont}" FontSize="9"
+                                                       Foreground="{DynamicResource Dim}" VerticalAlignment="Center"
+                                                       HorizontalAlignment="Right" Margin="0,0,5,0" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <TextBlock Grid.Row="1" Text="No embedded resources in this assembly."
+                                       Style="{StaticResource DimText}" HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" IsHitTestVisible="False" TextWrapping="Wrap"
+                                       TextAlignment="Center" MaxWidth="220"
+                                       Visibility="{Binding Summary.Resources.Count, Converter={StaticResource CountToVis}}" />
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource CardTight}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="{Binding ResourceHeader}" FontSize="11.5" FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis" ToolTip="{Binding ResourceHeader}" />
+                            <TextBlock Grid.Row="1" Text="{Binding ResourceNote}" Style="{StaticResource DimText}"
+                                       TextWrapping="Wrap" Margin="0,3,0,6" />
+
+                            <Grid Grid.Row="2">
+                                <Border Background="{DynamicResource CodeBackground}"
+                                        BorderBrush="{DynamicResource BorderSoft}" BorderThickness="1"
+                                        CornerRadius="3" ClipToBounds="True">
+                                    <Grid>
+                                        <TextBox Text="{Binding ResourceText, Mode=OneWay}" IsReadOnly="True"
+                                                 FontFamily="{StaticResource MonoFont}" FontSize="10"
+                                                 Foreground="{DynamicResource CodeText}"
+                                                 Background="Transparent" BorderThickness="0"
+                                                 Padding="8" TextWrapping="NoWrap"
+                                                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                                                 Visibility="{Binding HasResourceText, Converter={StaticResource BoolToVis}}" />
+
+                                        <Image Source="{Binding ResourceImage}" Stretch="Uniform" Margin="10"
+                                               RenderOptions.BitmapScalingMode="HighQuality"
+                                               Visibility="{Binding HasResourceImage, Converter={StaticResource BoolToVis}}" />
+
+                                        <TextBox Text="{Binding ResourceHex, Mode=OneWay}" IsReadOnly="True"
+                                                 FontFamily="{StaticResource MonoFont}" FontSize="9.5"
+                                                 Foreground="{DynamicResource CodeText}"
+                                                 Background="Transparent" BorderThickness="0"
+                                                 Padding="8" TextWrapping="NoWrap"
+                                                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                                                 Visibility="{Binding HasResourceHex, Converter={StaticResource BoolToVis}}" />
+
+                                        <TextBlock Text="Select a resource to preview its text, image or hex content."
+                                                   Style="{StaticResource DimText}" HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" IsHitTestVisible="False"
+                                                   TextWrapping="Wrap" TextAlignment="Center" MaxWidth="280"
+                                                   Visibility="{Binding HasResourceContent, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" />
+                                    </Grid>
+                                </Border>
+                            </Grid>
+
+                            <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,8,0,0">
+                                <Button Content="Save resource…" Style="{StaticResource SecondaryButton}" Height="28"
+                                        FontSize="10.5" Command="{Binding SaveResourceCommand}" />
+                                <Button Content="Copy preview" Style="{StaticResource GhostButton}" Height="28"
+                                        FontSize="10.5" Margin="6,0,0,0" Command="{Binding CopyResourceCommand}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- hex -->
+            <TabItem Header="HEX" Style="{StaticResource ObsidianTab}">
+                <Border Style="{StaticResource CardBare}" ClipToBounds="True">
+                    <controls:HexView Bytes="{Binding HexBytes}" SourceLabel="{Binding HexSourceLabel}" />
+                </Border>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>
+

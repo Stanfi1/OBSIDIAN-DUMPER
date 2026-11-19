@@ -1,0 +1,166 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        OBSIDIAN palette — LIGHT / "Paper"  (DESIGN_SYSTEM.md §1.2)
+
+        Colours only. Same key set as Palette.Dark.xaml; swapped at runtime by
+        Obsidian.Services.ThemeService.
+    -->
+
+    <!-- ============================ base surfaces ============================ -->
+    <Color x:Key="Bg0Color">#F4F4F5</Color>
+    <Color x:Key="Bg1Color">#EDEEF0</Color>
+    <Color x:Key="PanelColor">#FFFFFF</Color>
+    <Color x:Key="PanelAltColor">#F7F8F9</Color>
+    <Color x:Key="ElevatedColor">#FFFFFF</Color>
+
+    <SolidColorBrush x:Key="Bg0" Color="{StaticResource Bg0Color}" />
+    <SolidColorBrush x:Key="Bg1" Color="{StaticResource Bg1Color}" />
+    <SolidColorBrush x:Key="Panel" Color="{StaticResource PanelColor}" />
+    <SolidColorBrush x:Key="PanelAlt" Color="{StaticResource PanelAltColor}" />
+    <SolidColorBrush x:Key="Elevated" Color="{StaticResource ElevatedColor}" />
+    <SolidColorBrush x:Key="SurfaceSunken" Color="#ECEDEF" />
+    <SolidColorBrush x:Key="SurfaceRaised" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="SurfaceRaisedAlt" Color="#F7F8F9" />
+    <SolidColorBrush x:Key="SurfaceHeader" Color="#F7F8F9" />
+    <SolidColorBrush x:Key="WindowBar" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="SidebarSurface" Color="#F0F1F3" />
+    <SolidColorBrush x:Key="CommandBarSurface" Color="#FAFAFB" />
+    <SolidColorBrush x:Key="StatusBarSurface" Color="#F0F1F3" />
+    <SolidColorBrush x:Key="ToastSurface" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="TooltipSurface" Color="#FFFFFF" />
+
+    <SolidColorBrush x:Key="CardFill" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="CardSheen" Color="Transparent" />
+
+    <!-- ============================ borders and separators ============================ -->
+    <SolidColorBrush x:Key="Border" Color="#D8DBDF" />
+    <SolidColorBrush x:Key="BorderSoft" Color="#E5E7EA" />
+    <SolidColorBrush x:Key="BorderStrong" Color="#BFC4CB" />
+    <SolidColorBrush x:Key="BorderHover" Color="#C9CDD3" />
+    <SolidColorBrush x:Key="Separator" Color="#E2E4E7" />
+    <SolidColorBrush x:Key="SeparatorStrong" Color="#CCD0D5" />
+    <SolidColorBrush x:Key="GridLine" Color="#EDEEF0" />
+    <SolidColorBrush x:Key="SelectionBorder" Color="#E3C7C4" />
+    <SolidColorBrush x:Key="CardHeaderBorder" Color="#E2E4E7" />
+    <SolidColorBrush x:Key="HeroBorder" Color="#E2E4E7" />
+    <SolidColorBrush x:Key="ToastBorder" Color="#D8DBDF" />
+
+    <!-- ============================ text ============================ -->
+    <SolidColorBrush x:Key="Text" Color="#16181C" />
+    <SolidColorBrush x:Key="TextDim" Color="#3F454E" />
+    <SolidColorBrush x:Key="Muted" Color="#646B75" />
+    <SolidColorBrush x:Key="Dim" Color="#6F7782" />
+    <SolidColorBrush x:Key="TextOnAccent" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="WindowTitleText" Color="#16181C" />
+    <SolidColorBrush x:Key="AccentText" Color="#A5342C" />
+    <SolidColorBrush x:Key="CyanText" Color="#2A6A83" />
+    <SolidColorBrush x:Key="GreenText" Color="#1E7A55" />
+    <SolidColorBrush x:Key="AmberText" Color="#93610F" />
+    <SolidColorBrush x:Key="RedText" Color="#B23A32" />
+
+    <!-- ============================ accent family ============================ -->
+    <SolidColorBrush x:Key="Accent" Color="#B5372E" />
+    <SolidColorBrush x:Key="AccentHover" Color="#C2443B" />
+    <SolidColorBrush x:Key="AccentPressed" Color="#932C25" />
+    <SolidColorBrush x:Key="AccentSoft" Color="#C24A40" />
+    <SolidColorBrush x:Key="AccentTint" Color="#FBEAE8" />
+    <SolidColorBrush x:Key="AccentBorder" Color="#E9C4BF" />
+    <SolidColorBrush x:Key="AccentBorderStrong" Color="#C98B84" />
+    <SolidColorBrush x:Key="FocusRing" Color="#B5372E" />
+
+    <!-- ============================ semantic colours ============================ -->
+    <SolidColorBrush x:Key="Cyan" Color="#2F7C98" />
+    <SolidColorBrush x:Key="CyanTint" Color="#E8F3F7" />
+    <SolidColorBrush x:Key="Green" Color="#1E8A5F" />
+    <SolidColorBrush x:Key="GreenTint" Color="#E7F5EE" />
+    <SolidColorBrush x:Key="Amber" Color="#A9761A" />
+    <SolidColorBrush x:Key="AmberTint" Color="#FBF2E1" />
+    <SolidColorBrush x:Key="Red" Color="#C0392F" />
+    <SolidColorBrush x:Key="RedTint" Color="#FBE9E7" />
+    <SolidColorBrush x:Key="RowHover" Color="#F3F4F6" />
+    <SolidColorBrush x:Key="RowSelected" Color="#EEF0F3" />
+    <SolidColorBrush x:Key="NavHover" Color="#E9EBEE" />
+    <SolidColorBrush x:Key="NavSelected" Color="#E4E7EB" />
+    <SolidColorBrush x:Key="HoverStrong" Color="#E2E5E9" />
+
+    <!-- ============================ controls ============================ -->
+    <SolidColorBrush x:Key="ControlSurface" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ControlSurfaceHover" Color="#F5F6F8" />
+    <SolidColorBrush x:Key="ControlSurfacePressed" Color="#ECEEF1" />
+    <SolidColorBrush x:Key="ControlBorder" Color="#D4D8DD" />
+    <SolidColorBrush x:Key="ControlBorderHover" Color="#BCC2C9" />
+    <SolidColorBrush x:Key="InputSurface" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="InputSurfaceFocus" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="InputBorderFocus" Color="#B5372E" />
+    <SolidColorBrush x:Key="Selection" Color="#F3D5D2" />
+    <SolidColorBrush x:Key="CheckSurface" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="CheckBorder" Color="#C6CBD2" />
+    <SolidColorBrush x:Key="CheckBorderHover" Color="#B98C87" />
+    <SolidColorBrush x:Key="CheckBorderChecked" Color="#B5372E" />
+    <SolidColorBrush x:Key="CheckGlyph" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ChipSurface" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ChipBorder" Color="#DDE0E4" />
+    <SolidColorBrush x:Key="ChipBorderHover" Color="#C6CBD2" />
+    <SolidColorBrush x:Key="ChipTextChecked" Color="#A5342C" />
+    <SolidColorBrush x:Key="BadgeSurface" Color="#F4F5F6" />
+    <SolidColorBrush x:Key="BadgeBorder" Color="#DDE0E4" />
+    <SolidColorBrush x:Key="BadgeBorderAccent" Color="#EFD2CE" />
+    <SolidColorBrush x:Key="BadgeBorderCyan" Color="#CFE4EC" />
+    <SolidColorBrush x:Key="BadgeBorderGreen" Color="#CDE7DA" />
+    <SolidColorBrush x:Key="BadgeBorderAmber" Color="#F0E0BE" />
+    <SolidColorBrush x:Key="BadgeBorderRed" Color="#F0D3D0" />
+    <SolidColorBrush x:Key="ScrollThumb" Color="#C3C8CE" />
+    <SolidColorBrush x:Key="TooltipBorder" Color="#D8DBDF" />
+    <SolidColorBrush x:Key="TooltipText" Color="#16181C" />
+
+    <!-- ============================ decoration (compatibility) ============================ -->
+    <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#B5372E" Offset="0" />
+        <GradientStop Color="#A5342C" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="AccentGradientH" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#B5372E" Offset="0" />
+        <GradientStop Color="#A5342C" Offset="1" />
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="HeroWash" Color="#FFFFFF" />
+
+    <RadialGradientBrush x:Key="VioletGlow" GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+        <GradientStop Color="#00000000" Offset="0" />
+        <GradientStop Color="#00000000" Offset="1" />
+    </RadialGradientBrush>
+
+    <RadialGradientBrush x:Key="CyanGlow" GradientOrigin="0.5,0.5" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+        <GradientStop Color="#00000000" Offset="0" />
+        <GradientStop Color="#00000000" Offset="1" />
+    </RadialGradientBrush>
+
+    <DropShadowEffect x:Key="AccentGlow" Color="#B5372E" BlurRadius="0" ShadowDepth="0" Opacity="0" />
+    <DropShadowEffect x:Key="CardShadow" Color="#1A1D21" BlurRadius="16" ShadowDepth="4" Opacity="0.12" />
+
+    <!-- ============================ code / log / analysis ============================ -->
+    <SolidColorBrush x:Key="CodeBackground" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="CodeText" Color="#24292F" />
+    <SolidColorBrush x:Key="CodeKeyword" Color="#A04E2E" />
+    <SolidColorBrush x:Key="CodeType" Color="#2A6A83" />
+    <SolidColorBrush x:Key="CodeString" Color="#2E7D4F" />
+    <SolidColorBrush x:Key="CodeNumber" Color="#8A5A12" />
+    <SolidColorBrush x:Key="CodeComment" Color="#8A919B" />
+    <SolidColorBrush x:Key="CodeDirective" Color="#93610F" />
+    <SolidColorBrush x:Key="CodeSelection" Color="#F3D5D2" />
+    <SolidColorBrush x:Key="CodeLineNumber" Color="#A7ADB6" />
+    <SolidColorBrush x:Key="LogTrace" Color="#8A919B" />
+    <SolidColorBrush x:Key="LogInfo" Color="#44506A" />
+    <SolidColorBrush x:Key="LogSuccess" Color="#1E8A5F" />
+    <SolidColorBrush x:Key="LogWarning" Color="#93610F" />
+    <SolidColorBrush x:Key="LogError" Color="#C0392F" />
+    <SolidColorBrush x:Key="SeverityCritical" Color="#C0392F" />
+    <SolidColorBrush x:Key="SeveritySuspicious" Color="#93610F" />
+    <SolidColorBrush x:Key="SeverityInfo" Color="#2A6A83" />
+    <SolidColorBrush x:Key="StatusOnline" Color="#1E8A5F" />
+    <SolidColorBrush x:Key="StatusOffline" Color="#8A919B" />
+
+</ResourceDictionary>

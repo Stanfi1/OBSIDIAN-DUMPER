@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Obsidian.Dumper.Core</RootNamespace>
+    <AssemblyName>Obsidian.Dumper.Core</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>x64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="dnlib" Version="4.4.0" />
+    <PackageReference Include="ICSharpCode.Decompiler" Version="9.1.0.7988" />
+    <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="4.2.751201" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Obsidian.Dumper.Shared\**\*.cs" LinkBase="Shared" />
+  </ItemGroup>
+
+</Project>

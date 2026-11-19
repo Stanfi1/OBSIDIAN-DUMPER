@@ -1,0 +1,25 @@
+<Project>
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Version>1.4.1</Version>
+    <Product>OBSIDIAN Dumper</Product>
+    <Company>OBSIDIAN</Company>
+    <Authors>OBSIDIAN</Authors>
+    <Copyright>Copyright (c) 2026 OBSIDIAN</Copyright>
+    <NeutralLanguage>en</NeutralLanguage>
+    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <NoWarn>$(NoWarn);CA1416;NU1701</NoWarn>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- Deterministic, portable output for the shipped binaries. -->
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+</Project>
